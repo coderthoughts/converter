@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.osgi.service.converter.CodecAdapter;
 import org.osgi.service.converter.Converter;
-import org.osgi.service.converter.impl.CodecAdapterImpl;
 import org.osgi.service.converter.impl.ConverterImpl;
 import org.osgi.service.converter.impl.JsonCodecImpl;
 
@@ -22,15 +21,24 @@ public class MyMainClass {
 
         Converter c = new ConverterImpl();
         System.out.println("Long -> String " + c.convert(12L).to(String.class));
+        System.out.println("String -> Long " + c.convert("123").to(Long.class));
         System.out.println("Map -> String " + c.convert(m).to(String.class));
 
         CodecAdapter ca0 = c.getCodecAdapter(c.getDefaultCodec());
-        ca0.valueRule(11L, v -> "\"" + v + "elf" + v + "\"");
-        System.out.println("2: Map -> String " + c.with(ca0).convert(11L).to(String.class));
-        System.out.println("2: Map -> String " + c.with(ca0).convert(12L).to(String.class));
+        ca0.rule(Long.class, v -> "\"" + v + "elf" + v + "\"");
+        System.out.println("2: Map -> String " + c.convert(11L).with(ca0).to(String.class));
+        System.out.println("2: Map -> String " + c.convert(12L).with(ca0).to(String.class));
         System.out.println("2: Map -> String " + c.convert(11L).to(String.class));
 
+        // use 1
+        JsonCodecImpl jsonCodec = new JsonCodecImpl();
+        System.out.println("U1: " + c.convert(m).with(jsonCodec).to(String.class));
+        // use 2
+        jsonCodec.configure("pretty", "true");
+        System.out.println("U2: " + jsonCodec.encode(m).getString());
 
+
+        /*
         JsonCodecImpl jc = new JsonCodecImpl();
         System.out.println("mn: " + jc.encode(m));
         System.out.println("mP: " + jc.configure("pretty", "true").encode(m));

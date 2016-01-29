@@ -34,9 +34,4 @@ public class ConverterImpl implements Converter {
     public Converting convert(Object obj) {
         return new ConvertingImpl(codec, obj);
     }
-
-    @Override
-    public Converter with(Codec myCodec) {
-        return new ConverterImpl(myCodec);
-    }
 }

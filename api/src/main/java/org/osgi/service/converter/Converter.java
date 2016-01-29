@@ -6,6 +6,4 @@ public interface Converter {
     Codec getDefaultCodec();
 
     Converting convert(Object obj);
-
-    Converter with(Codec myCodec);
 }
