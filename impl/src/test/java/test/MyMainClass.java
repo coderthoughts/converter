@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.osgi.service.converter.CodecAdapter;
+import org.osgi.service.converter.Converter;
 import org.osgi.service.converter.impl.CodecAdapterImpl;
+import org.osgi.service.converter.impl.ConverterImpl;
 import org.osgi.service.converter.impl.JsonCodecImpl;
 
 public class MyMainClass {
@@ -17,6 +19,17 @@ public class MyMainClass {
         m.put(1, 11L);
         m.put("ab", "cd");
         m.put(true, m1);
+
+        Converter c = new ConverterImpl();
+        System.out.println("Long -> String " + c.convert(12L).to(String.class));
+        System.out.println("Map -> String " + c.convert(m).to(String.class));
+
+        CodecAdapter ca0 = c.getCodecAdapter(c.getDefaultCodec());
+        ca0.valueRule(11L, v -> "\"" + v + "elf" + v + "\"");
+        System.out.println("2: Map -> String " + c.with(ca0).convert(11L).to(String.class));
+        System.out.println("2: Map -> String " + c.with(ca0).convert(12L).to(String.class));
+        System.out.println("2: Map -> String " + c.convert(11L).to(String.class));
+
 
         JsonCodecImpl jc = new JsonCodecImpl();
         System.out.println("mn: " + jc.encode(m));
