@@ -1,0 +1,30 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+      <groupId>org.coderthoughts.osgi.converter</groupId>
+      <artifactId>reactor</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+
+      <relativePath>../parent.pom</relativePath>
+    </parent>
+
+    <artifactId>api</artifactId>
+    <packaging>bundle</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>3.0.1</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>*</Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
