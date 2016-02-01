@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.service.converter.Codec;
+import org.osgi.service.converter.Decoding;
 import org.osgi.service.converter.Encoding;
 
 public class JsonCodecImpl implements Codec {
@@ -24,6 +25,11 @@ public class JsonCodecImpl implements Codec {
     public Codec with(Codec codec) {
         parentCodec = codec;
         return this;
+    }
+
+    @Override
+    public <T> Decoding<T> decode(Class<T> cls) {
+        return new DecodingImpl<T>(cls);
     }
 
     @Override

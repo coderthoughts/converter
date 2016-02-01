@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import org.osgi.service.converter.Codec;
 import org.osgi.service.converter.CodecAdapter;
+import org.osgi.service.converter.Decoding;
 import org.osgi.service.converter.Encoding;
 
 public class CodecAdapterImpl implements CodecAdapter {
@@ -39,6 +40,11 @@ public class CodecAdapterImpl implements CodecAdapter {
     public Codec with(Codec codec) {
         topCodec = codec;
         return this;
+    }
+
+    @Override
+    public <T> Decoding<T> decode(Class<T> cls) {
+        return delegate.decode(cls);
     }
 
     @Override

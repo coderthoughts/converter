@@ -22,7 +22,7 @@ public interface Codec {
      */
     Codec configure(Map<String, Object> m);
 
-//    Decoding<T> decode(Class<T> cls);
+    <T> Decoding<T> decode(Class<T> cls);
 
     /**
      * Encode the given object

@@ -35,9 +35,14 @@ public class MyMainClass {
         CodecAdapter ca0 = c.getCodecAdapter(c.getDefaultCodec());
 //        ca0.rule(Long.class, v -> "\"" + v + "elf" + v + "\"");
         ca0.rule(String[].class, Arrays::toString, v -> v.split(","));
-        System.out.println("2: Map -> String " + c.convert(11L).with(ca0).to(String.class));
-        System.out.println("2: Map -> String " + c.convert(12L).with(ca0).to(String.class));
-        System.out.println("2: Map -> String " + c.convert(11L).to(String.class));
+        String[] sa = c.convert(new String[] {"A", "B"}).to(String[].class);
+        System.out.println("Without CA0:" + Arrays.toString(sa));
+        String[] sa2 = c.convert(new String[] {"A", "B"}).with(ca0).to(String[].class);
+        System.out.println("With CA0:" + Arrays.toString(sa2));
+        // decode as well... via Converter
+//        System.out.println("2: Map -> String " + c.convert(11L).with(ca0).to(String.class));
+//        System.out.println("2: Map -> String " + c.convert(12L).with(ca0).to(String.class));
+//        System.out.println("2: Map -> String " + c.convert(11L).to(String.class));
 
         // use 1
         JsonCodecImpl jsonCodec = new JsonCodecImpl();
