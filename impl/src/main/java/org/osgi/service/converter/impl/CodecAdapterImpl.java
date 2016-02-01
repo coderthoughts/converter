@@ -10,8 +10,8 @@ import org.osgi.service.converter.Encoding;
 
 public class CodecAdapterImpl implements CodecAdapter {
     private final Codec delegate;
-
     private final Map<Class<Object>, Function<Object, String>> classRules = new ConcurrentHashMap<>();
+    private Codec topCodec = this;
 
     public CodecAdapterImpl(Codec codec) {
         this.delegate = codec;
@@ -29,10 +29,15 @@ public class CodecAdapterImpl implements CodecAdapter {
         return this;
     }
 
+    @Override
+    public Codec from(Codec codec) {
+        topCodec = codec;
+        return this;
+    }
 
     @Override
     public Encoding encode(Object obj) {
-        Encoding e = delegate.encode(obj);
+        Encoding e = delegate.from(topCodec).encode(obj);
         return new EncodingWrapper(e, obj);
     }
 

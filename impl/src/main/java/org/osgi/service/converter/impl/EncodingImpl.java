@@ -2,15 +2,12 @@ package org.osgi.service.converter.impl;
 
 import java.util.Map;
 
-import org.osgi.service.converter.Codec;
 import org.osgi.service.converter.Encoding;
 
 class EncodingImpl implements Encoding {
-    private final Codec topCodec;
     private final Object object;
 
-    EncodingImpl(Codec c, Object obj) {
-        topCodec = c;
+    EncodingImpl(Object obj) {
         object = obj;
     }
 

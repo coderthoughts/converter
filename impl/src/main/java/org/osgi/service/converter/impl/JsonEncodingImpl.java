@@ -9,10 +9,10 @@ import org.osgi.service.converter.Encoding;
 
 public class JsonEncodingImpl implements Encoding {
     private final Map<String, Object> configuration;
-    private final Codec topCodec;
     private final Object object;
+    private Codec topCodec;
 
-    JsonEncodingImpl(JsonCodecImpl codec, Map<String, Object> cfg, Object obj) {
+    JsonEncodingImpl(Codec codec, Map<String, Object> cfg, Object obj) {
         topCodec = codec;
         configuration = cfg;
         object = obj;
@@ -22,17 +22,13 @@ public class JsonEncodingImpl implements Encoding {
         return Boolean.TRUE.equals(Boolean.parseBoolean((String) configuration.get("ignoreNull")));
     }
 
-    private boolean pretty() {
-        return Boolean.TRUE.equals(Boolean.parseBoolean((String) configuration.get("pretty")));
-    }
-
     @Override
     public String getString() {
-        if (pretty()) {
-            return "{}{}{}{}" + encode(topCodec, object) + "{}{}{}{}";
-        } else {
+//        if (pretty()) {
+//            return "{}{}{}{}" + encode(topCodec, object) + "{}{}{}{}";
+//        } else {
             return encode(topCodec, object);
-        }
+//        }
     }
 
     public String encode(Codec top, Object obj) {

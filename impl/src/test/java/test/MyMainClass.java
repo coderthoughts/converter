@@ -37,6 +37,9 @@ public class MyMainClass {
         jsonCodec.configure("pretty", "true");
         System.out.println("U2: " + jsonCodec.encode(m).getString());
 
+        CodecAdapter ca = c.getCodecAdapter(jsonCodec);
+        ca.rule(Boolean.class, v -> "XX" + v.toString().substring(0, 1) + "XX");
+        System.out.println("CA: " + ca.encode(m).getString());
 
         /*
         JsonCodecImpl jc = new JsonCodecImpl();

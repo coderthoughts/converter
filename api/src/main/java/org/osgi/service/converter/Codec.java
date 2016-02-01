@@ -3,7 +3,6 @@ package org.osgi.service.converter;
 import java.util.Collections;
 import java.util.Map;
 
-
 // Converts to-from string.
 public interface Codec {
     default Codec configure(String key, Object val) {
@@ -13,4 +12,8 @@ public interface Codec {
     Codec configure(Map<String, Object> m);
 
     Encoding encode(Object obj);
+
+    Codec from(Codec topCodec);
+
+//    Encoding encode(Codec baseCodec, Object obj); ??
 }

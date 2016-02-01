@@ -13,6 +13,11 @@ public class InternalCodec implements Codec {
 
     @Override
     public Encoding encode(Object obj) {
-        return new EncodingImpl(this, obj);
+        return new EncodingImpl(obj);
+    }
+
+    @Override
+    public Codec from(Codec parentCodec) {
+        return this;
     }
 }
