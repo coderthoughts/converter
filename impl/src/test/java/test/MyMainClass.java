@@ -1,7 +1,11 @@
 package test;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.osgi.service.converter.CodecAdapter;
 import org.osgi.service.converter.Converter;
@@ -10,7 +14,11 @@ import org.osgi.service.converter.impl.JsonCodecImpl;
 
 public class MyMainClass {
 
-    public static void main(String [] args) {
+    public static void main(String [] args) throws Exception {
+        String[] a = {"A", "B"};
+        System.out.println("" + Arrays.stream(a).collect(Collectors.joining(",")));
+        System.out.println("" + Stream.of(a).collect(Collectors.joining(":")));
+
         Map<Object, Object> m1 = new HashMap<>();
         m1.put("x", true);
         m1.put("y", null);
@@ -25,7 +33,8 @@ public class MyMainClass {
         System.out.println("Map -> String " + c.convert(m).to(String.class));
 
         CodecAdapter ca0 = c.getCodecAdapter(c.getDefaultCodec());
-        ca0.rule(Long.class, v -> "\"" + v + "elf" + v + "\"");
+//        ca0.rule(Long.class, v -> "\"" + v + "elf" + v + "\"");
+        ca0.rule(String[].class, Arrays::toString, v -> v.split(","));
         System.out.println("2: Map -> String " + c.convert(11L).with(ca0).to(String.class));
         System.out.println("2: Map -> String " + c.convert(12L).with(ca0).to(String.class));
         System.out.println("2: Map -> String " + c.convert(11L).to(String.class));
@@ -35,10 +44,17 @@ public class MyMainClass {
         System.out.println("U1: " + c.convert(m).with(jsonCodec).to(String.class));
         // use 2
         jsonCodec.configure("pretty", "true");
-        System.out.println("U2: " + jsonCodec.encode(m).getString());
+//        System.out.println("U2: " + jsonCodec.encode(m).getString());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            jsonCodec.encode(m).to(baos);
+        } finally {
+            baos.close();
+        }
+        System.out.println("U2: " + new String(baos.toByteArray()));
 
         CodecAdapter ca = c.getCodecAdapter(jsonCodec);
-        ca.rule(Boolean.class, v -> "XX" + v.toString().substring(0, 1) + "XX");
+//        ca.rule(Boolean.class, v -> "XX" + v.toString().substring(0, 1) + "XX");
         System.out.println("CA: " + ca.encode(m).getString());
 
         /*

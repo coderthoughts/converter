@@ -1,5 +1,8 @@
 package org.osgi.service.converter.impl;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.osgi.service.converter.Encoding;
@@ -20,6 +23,11 @@ class EncodingImpl implements Encoding {
             return encodeMap((Map) object);
 
         return object.toString();
+    }
+
+    @Override
+    public void to(OutputStream os) throws IOException {
+        os.write(getString().getBytes(StandardCharsets.UTF_8));
     }
 
     private String encodeMap(Map obj) {

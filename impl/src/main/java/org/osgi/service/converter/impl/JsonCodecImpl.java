@@ -1,5 +1,8 @@
 package org.osgi.service.converter.impl;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,7 +21,7 @@ public class JsonCodecImpl implements Codec {
     }
 
     @Override
-    public Codec from(Codec codec) {
+    public Codec with(Codec codec) {
         parentCodec = codec;
         return this;
     }
@@ -51,6 +54,11 @@ public class JsonCodecImpl implements Codec {
             prefix = pre;
             delegate = encoding;
             postfix = post;
+        }
+
+        @Override
+        public void to(OutputStream os) throws IOException {
+            os.write(getString().getBytes(StandardCharsets.UTF_8));
         }
 
         @Override

@@ -17,7 +17,7 @@ public class InternalCodec implements Codec {
     }
 
     @Override
-    public Codec from(Codec parentCodec) {
+    public Codec with(Codec parentCodec) {
         return this;
     }
 }

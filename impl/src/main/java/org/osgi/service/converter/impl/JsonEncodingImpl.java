@@ -1,5 +1,8 @@
 package org.osgi.service.converter.impl;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -23,12 +26,13 @@ public class JsonEncodingImpl implements Encoding {
     }
 
     @Override
+    public void to(OutputStream os) throws IOException {
+        os.write(encode(topCodec, object).getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Override
     public String getString() {
-//        if (pretty()) {
-//            return "{}{}{}{}" + encode(topCodec, object) + "{}{}{}{}";
-//        } else {
-            return encode(topCodec, object);
-//        }
+        return encode(topCodec, object);
     }
 
     public String encode(Codec top, Object obj) {
