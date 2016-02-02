@@ -33,23 +33,24 @@ public class MyMainClass {
         System.out.println("Map -> String " + c.convert(m).to(String.class));
 
         CodecAdapter ca0 = c.getCodecAdapter(c.getDefaultCodec());
-//        ca0.rule(Long.class, v -> "\"" + v + "elf" + v + "\"");
-        ca0.rule(String[].class, Arrays::toString, v -> v.split(","));
-        String[] sa = c.convert(new String[] {"A", "B"}).to(String[].class);
-        System.out.println("Without CA0:" + Arrays.toString(sa));
-        String[] sa2 = c.convert(new String[] {"A", "B"}).with(ca0).to(String[].class);
-        System.out.println("With CA0:" + Arrays.toString(sa2));
-        // decode as well... via Converter
-//        System.out.println("2: Map -> String " + c.convert(11L).with(ca0).to(String.class));
-//        System.out.println("2: Map -> String " + c.convert(12L).with(ca0).to(String.class));
-//        System.out.println("2: Map -> String " + c.convert(11L).to(String.class));
+        ca0.rule(String[].class,
+                v -> Stream.of(v).collect(Collectors.joining(",")),
+                v -> v.split(","));
+        String sa = c.convert(new String[] {"A", "B"}).to(String.class);
+        System.out.println("Without CA0:" + sa);
+        String sa2 = c.convert(new String[] {"A", "B"}).with(ca0).to(String.class);
+        System.out.println("With CA0:" + sa2);
+
+        String[] decoded = c.convert(sa2).to(String[].class);
+        System.out.println("decoded: " + Arrays.toString(decoded) + " len: " + decoded.length);
+        String[] decoded2 = c.convert(sa2).with(ca0).to(String[].class);
+        System.out.println("decoded2: " + Arrays.toString(decoded2) + " len: " + decoded2.length);
 
         // use 1
         JsonCodecImpl jsonCodec = new JsonCodecImpl();
         System.out.println("U1: " + c.convert(m).with(jsonCodec).to(String.class));
         // use 2
         jsonCodec.configure("pretty", "true");
-//        System.out.println("U2: " + jsonCodec.encode(m).getString());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             jsonCodec.encode(m).to(baos);
@@ -57,84 +58,21 @@ public class MyMainClass {
             baos.close();
         }
         System.out.println("U2: " + new String(baos.toByteArray()));
+        String ms = new JsonCodecImpl().encode(m).getString();
+        System.out.println("U3: " + ms);
+        Map<?,?> m2 = new JsonCodecImpl().decode(Map.class).from(ms);
+        System.out.println("M2: " + m2);
 
         CodecAdapter ca = c.getCodecAdapter(jsonCodec);
-//        ca.rule(Boolean.class, v -> "XX" + v.toString().substring(0, 1) + "XX");
+        ca.rule(Boolean.class,
+                v -> "XX" + v.toString().charAt(0) + "XX",
+                v -> v.charAt(2)=='t'?true:false);
         System.out.println("CA: " + ca.encode(m).getString());
-
-        /*
-        JsonCodecImpl jc = new JsonCodecImpl();
-        System.out.println("mn: " + jc.encode(m));
-        System.out.println("mP: " + jc.configure("pretty", "true").encode(m));
-        System.out.println("mN: " + jc.configure("ignoreNull", "false").encode(m));
-
-        CodecAdapter ca = new CodecAdapterImpl(jc);
-        ca.valueRule(11L, v -> "\"eleven\"");
-        ca.classRule(Boolean.class, v -> "XX" + v.toString().substring(0, 1) + "XX");
-        System.out.println("Ca: " + ca.encode(m));
-
-//        ca.rule(Boolean.class, lambda);
-
-        /*
-        ConverterImpl converter = new ConverterImpl();
-
-        Codec myCodec = new MyCodec(converter.defaultCodec());
-
-        System.out.println("R1: " + converter.with(myCodec).convert(12L).to(String.class));
-        System.out.println("R2: " + converter.with(myCodec).convert(13L).to(String.class));
-        System.out.println("R3: " + converter.with(myCodec).convert(null).to(String.class));
-        System.out.println("R4: " + converter.with(myCodec).convert(null).to(String.class)); // Maybe we should return a Codec that is configured?
-
-        System.out.println("Result: " + new CodecImpl().encode(12L).getString());
-        */
-//        Runnable r = new EncoderImpl().decode(Runnable.class).ignoreNull().from("");
-//        System.out.println("***" + r);
+        String bs = ca.encode(true).getString();
+        boolean b = ca.decode(Boolean.class).from(bs);
+        System.out.println("" + bs + "=" + b);
+        String bs2 = ca.encode(false).getString();
+        boolean b2 = ca.decode(Boolean.class).from(bs2);
+        System.out.println("" + bs2 + "=" + b2);
     }
-/*
-    private static class MyCodec implements Codec {
-        private final Codec delegate;
-
-        public MyCodec(Codec del) {
-            delegate = del;
-        }
-
-        @Override
-        public Encoding encode(Object obj) {
-            return new MyEncodingImpl(obj, delegate);
-        }
-
-        @Override
-        public <T> Decoding<T> decode(Class<T> cls) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-    }
-
-
-    private static class MyEncodingImpl implements Encoding {
-        // Support specific configuration?
-
-        private final Object object;
-        private final Codec delegate;
-
-        public MyEncodingImpl(Object obj, Codec del) {
-            object = obj;
-            delegate = del;
-        }
-
-        @Override
-        public Encoding ignoreNull() {
-            return this;
-        }
-
-        @Override
-        public String getString() {
-            if (Long.valueOf(13L).equals(object)) {
-                return "14";
-            } else {
-                return delegate.encode(object).getString();
-            }
-        }
-
-    } */
 }

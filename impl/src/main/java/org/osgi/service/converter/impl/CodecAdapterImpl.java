@@ -44,7 +44,8 @@ public class CodecAdapterImpl implements CodecAdapter {
 
     @Override
     public <T> Decoding<T> decode(Class<T> cls) {
-        return delegate.decode(cls);
+        Decoding<T> d = delegate.decode(cls);
+        return new DecodingWrapper<T>(d, cls);
     }
 
     @Override
@@ -61,12 +62,30 @@ public class CodecAdapterImpl implements CodecAdapter {
         return this;
     }
 
+    private class DecodingWrapper<T> implements Decoding<T> {
+        private final Decoding<T> del;
+        private final Class<T> clazz;
+
+        public DecodingWrapper(Decoding<T> d, Class<T> cls) {
+            del = d;
+            clazz = cls;
+        }
+
+        @Override
+        public T from(CharSequence in) {
+            Function<String, Object> cf = fromClassRules.get(clazz);
+            if (cf != null)
+                return (T) cf.apply(in.toString());
+            return del.from(in);
+        }
+    }
+
     private class EncodingWrapper implements Encoding {
-        private final Encoding delegate;
+        private final Encoding del;
         private final Object object;
 
         EncodingWrapper(Encoding encoding, Object obj) {
-            delegate = encoding;
+            del = encoding;
             object = obj;
         }
 
@@ -78,12 +97,12 @@ public class CodecAdapterImpl implements CodecAdapter {
         @Override
         public String getString() {
             if (object == null)
-                return delegate.getString();
+                return del.getString();
 
             Function<Object, String> cf = toClassRules.get(object.getClass());
             if (cf != null)
                 return cf.apply(object);
-            return delegate.getString();
+            return del.getString();
         }
     }
 }

@@ -19,6 +19,8 @@ public class ConvertingImpl implements Converting {
     public <T> T to(Class<T> cls) {
         if (String.class.equals(cls)) {
             return (T) codec.encode(object).getString();
+        } else if (object instanceof String) {
+            return codec.decode(cls).from((String) object);
         }
 
         T res = tryStandardMethods(cls);

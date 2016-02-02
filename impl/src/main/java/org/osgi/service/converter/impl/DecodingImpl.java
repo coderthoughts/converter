@@ -1,5 +1,6 @@
 package org.osgi.service.converter.impl;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 
 import org.osgi.service.converter.Decoding;
@@ -13,7 +14,16 @@ public class DecodingImpl<T> implements Decoding<T> {
 
     @Override
     public T from(CharSequence in) {
+        if (Object[].class.isAssignableFrom(clazz)) {
+            return createArray(in);
+        }
         return tryStandardMethods(clazz, in);
+    }
+
+    private T createArray(CharSequence in) {
+        Object[] res = (Object[]) Array.newInstance(clazz.getComponentType(), 1);
+        res[0] = in;
+        return (T) res;
     }
 
     @SuppressWarnings("unchecked")

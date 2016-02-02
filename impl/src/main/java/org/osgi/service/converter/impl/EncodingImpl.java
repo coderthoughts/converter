@@ -19,6 +19,9 @@ class EncodingImpl implements Encoding {
         if (object == null)
             return null;
 
+        if (object instanceof Object[])
+            return ((Object[]) object)[0].toString();
+
         if (object instanceof Map)
             return encodeMap((Map) object);
 
