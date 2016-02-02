@@ -2,15 +2,15 @@ package org.osgi.service.converter.impl;
 
 import java.lang.reflect.Method;
 
-import org.osgi.service.converter.Codec;
+import org.osgi.service.converter.Converter;
 import org.osgi.service.converter.Converting;
 
 public class ConvertingImpl implements Converting {
-    private final Codec codec;
+    private Converter converter;
     private final Object object;
 
-    ConvertingImpl(Codec c, Object obj) {
-        codec = c;
+    ConvertingImpl(Converter c, Object obj) {
+        converter = c;
         object = obj;
     }
 
@@ -18,9 +18,13 @@ public class ConvertingImpl implements Converting {
     @Override
     public <T> T to(Class<T> cls) {
         if (String.class.equals(cls)) {
-            return (T) codec.encode(object).getString();
-        } else if (object instanceof String) {
-            return codec.decode(cls).from((String) object);
+            if (object instanceof Object[])
+                return (T) ((Object[])object)[0];
+            return (T) object.toString();
+        } else if (String[].class.equals(cls)) {
+            String[] res = new String[1];
+            res[0] = object.toString();
+            return (T) res;
         }
 
         T res = tryStandardMethods(cls);
@@ -45,8 +49,8 @@ public class ConvertingImpl implements Converting {
         return null;
     }
 
-    @Override
-    public Converting with(Codec myCodec) {
-        return new ConvertingImpl(myCodec, object);
+    public Converting with(Converter c) {
+        converter = c;
+        return this;
     }
 }

@@ -7,16 +7,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.osgi.service.converter.Codec;
+import org.osgi.service.converter.Converter;
 import org.osgi.service.converter.Encoding;
 
 public class JsonEncodingImpl implements Encoding {
+    private final Converter converter;
     private final Map<String, Object> configuration;
     private final Object object;
-    private Codec topCodec;
 
-    JsonEncodingImpl(Codec codec, Map<String, Object> cfg, Object obj) {
-        topCodec = codec;
+    JsonEncodingImpl(Converter c, Map<String, Object> cfg, Object obj) {
+        converter = c;
         configuration = cfg;
         object = obj;
     }
@@ -27,21 +27,21 @@ public class JsonEncodingImpl implements Encoding {
 
     @Override
     public void to(OutputStream os) throws IOException {
-        os.write(encode(topCodec, object).getBytes(StandardCharsets.UTF_8));
+        os.write(encode(object).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
     public String getString() {
-        return encode(topCodec, object);
+        return encode(object);
     }
 
-    public String encode(Codec top, Object obj) {
+    public String encode(Object obj) {
         if (obj == null) {
             return ignoreNull() ? "" : "\"null\"";
         }
 
         if (obj instanceof Map) {
-            return encodeMap(top, (Map) obj);
+            return encodeMap((Map) obj);
         } else if (obj instanceof Number) {
             return obj.toString();
         } else if (obj instanceof Boolean) {
@@ -51,7 +51,7 @@ public class JsonEncodingImpl implements Encoding {
         return "\"" + obj.toString() + "\"";
     }
 
-    private String encodeMap(Codec topCodec, Map m) {
+    private String encodeMap(Map m) {
         StringBuilder sb = new StringBuilder("{");
         for (Entry<?,?> entry : (Set<Entry>) m.entrySet()) {
             if (entry.getKey() == null || entry.getValue() == null)
@@ -63,7 +63,7 @@ public class JsonEncodingImpl implements Encoding {
             sb.append('"');
             sb.append(entry.getKey().toString());
             sb.append("\":");
-            sb.append(topCodec.encode(entry.getValue()).getString());
+            sb.append(converter.convert(entry.getValue()).to(String.class));
         }
         sb.append("}");
 

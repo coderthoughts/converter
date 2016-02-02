@@ -7,13 +7,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.service.converter.Codec;
+import org.osgi.service.converter.Converter;
 import org.osgi.service.converter.Decoding;
 import org.osgi.service.converter.Encoding;
 
 public class JsonCodecImpl implements Codec {
     private Map<String, Object> configuration = new ConcurrentHashMap<>();
-    private Codec parentCodec = this;
     private ThreadLocal<Boolean> threadLocal = new ThreadLocal<>();
+    private Converter converter = new ConverterImpl(); // TODO inject?
 
     @Override
     public Codec configure(Map<String, Object> m) {
@@ -22,8 +23,8 @@ public class JsonCodecImpl implements Codec {
     }
 
     @Override
-    public Codec with(Codec codec) {
-        parentCodec = codec;
+    public Codec with(Converter c) {
+        converter = c;
         return this;
     }
 
@@ -34,7 +35,7 @@ public class JsonCodecImpl implements Codec {
 
     @Override
     public Encoding encode(Object obj) {
-        Encoding encoding = new JsonEncodingImpl(parentCodec, configuration, obj);
+        Encoding encoding = new JsonEncodingImpl(converter, configuration, obj);
 
         if (pretty()) {
             Boolean top = threadLocal.get();

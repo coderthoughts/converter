@@ -1,16 +1,14 @@
 package test;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.osgi.service.converter.CodecAdapter;
+import org.osgi.service.converter.Adapter;
 import org.osgi.service.converter.Converter;
 import org.osgi.service.converter.impl.ConverterImpl;
-import org.osgi.service.converter.impl.JsonCodecImpl;
 
 public class MyMainClass {
 
@@ -32,20 +30,21 @@ public class MyMainClass {
         System.out.println("String -> Long " + c.convert("123").to(Long.class));
         System.out.println("Map -> String " + c.convert(m).to(String.class));
 
-        CodecAdapter ca0 = c.getCodecAdapter(c.getDefaultCodec());
-        ca0.rule(String[].class,
+        Adapter ca = c.getAdapter();
+        ca.rule(String[].class,
                 v -> Stream.of(v).collect(Collectors.joining(",")),
                 v -> v.split(","));
         String sa = c.convert(new String[] {"A", "B"}).to(String.class);
-        System.out.println("Without CA0:" + sa);
-        String sa2 = c.convert(new String[] {"A", "B"}).with(ca0).to(String.class);
-        System.out.println("With CA0:" + sa2);
+        System.out.println("Without CA: " + sa);
+        String sa2 = ca.convert(new String[] {"A", "B"}).to(String.class);
+        System.out.println("With CA: " + sa2);
 
         String[] decoded = c.convert(sa2).to(String[].class);
         System.out.println("decoded: " + Arrays.toString(decoded) + " len: " + decoded.length);
-        String[] decoded2 = c.convert(sa2).with(ca0).to(String[].class);
+        String[] decoded2 = ca.convert(sa2).to(String[].class);
         System.out.println("decoded2: " + Arrays.toString(decoded2) + " len: " + decoded2.length);
 
+        /*
         // use 1
         JsonCodecImpl jsonCodec = new JsonCodecImpl();
         System.out.println("U1: " + c.convert(m).with(jsonCodec).to(String.class));
@@ -63,7 +62,7 @@ public class MyMainClass {
         Map<?,?> m2 = new JsonCodecImpl().decode(Map.class).from(ms);
         System.out.println("M2: " + m2);
 
-        CodecAdapter ca = c.getCodecAdapter(jsonCodec);
+        Adapter ca = c.getCodecAdapter(jsonCodec);
         ca.rule(Boolean.class,
                 v -> "XX" + v.toString().charAt(0) + "XX",
                 v -> v.charAt(2)=='t'?true:false);
@@ -75,7 +74,7 @@ public class MyMainClass {
         boolean b2 = ca.decode(Boolean.class).from(bs2);
         System.out.println("" + bs2 + "=" + b2);
 
-        CodecAdapter ca2 = c.getCodecAdapter(new JsonCodecImpl());
+        Adapter ca2 = c.getCodecAdapter(new JsonCodecImpl());
         ca2.rule(Boolean.class,
                 v -> "XX" + v.toString().charAt(0) + "XX",
                 v -> v.charAt(2)=='t'?true:false);
@@ -83,6 +82,6 @@ public class MyMainClass {
         System.out.println("CA2: " + cs);
         Map cm2 = ca2.decode(Map.class).from(cs);
         System.out.println("CM2: " + cm2);
-
+*/
     }
 }

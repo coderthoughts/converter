@@ -38,5 +38,5 @@ public interface Codec {
      * @param topCodec The top-level codec to use.
      * @return The codec
      */
-    Codec with(Codec topCodec);
+    Codec with(Converter converter);
 }
