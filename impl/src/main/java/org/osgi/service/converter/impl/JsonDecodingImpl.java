@@ -18,7 +18,7 @@ public class JsonDecodingImpl<T> implements Decoding<T> {
         if (Map.class.isAssignableFrom(clazz)) {
             return createMapFromJSONString(in);
         }
-        return tryStandardMethods(clazz, in);
+        return deserializeSingleJSONValue(clazz, in);
     }
 
     private T createMapFromJSONString(CharSequence in) {
@@ -85,7 +85,9 @@ public class JsonDecodingImpl<T> implements Decoding<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T tryStandardMethods(Class<T> cls, CharSequence cs) {
+    private <T> T deserializeSingleJSONValue(Class<T> cls, CharSequence cs) {
+
+
         try {
             Method m = cls.getDeclaredMethod("valueOf", String.class);
             if (m != null) {

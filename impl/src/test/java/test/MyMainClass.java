@@ -74,5 +74,15 @@ public class MyMainClass {
         String bs2 = ca.encode(false).getString();
         boolean b2 = ca.decode(Boolean.class).from(bs2);
         System.out.println("" + bs2 + "=" + b2);
+
+        CodecAdapter ca2 = c.getCodecAdapter(new JsonCodecImpl());
+        ca2.rule(Boolean.class,
+                v -> "XX" + v.toString().charAt(0) + "XX",
+                v -> v.charAt(2)=='t'?true:false);
+        String cs = ca2.encode(m).getString();
+        System.out.println("CA2: " + cs);
+        Map cm2 = ca2.decode(Map.class).from(cs);
+        System.out.println("CM2: " + cm2);
+
     }
 }
