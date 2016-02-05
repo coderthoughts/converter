@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.osgi.service.converter.Adapter;
 import org.osgi.service.converter.Converter;
 import org.osgi.service.converter.impl.ConverterImpl;
+import org.osgi.service.converter.impl.JsonCodecImpl;
 
 public class MyMainClass {
 
@@ -31,7 +32,7 @@ public class MyMainClass {
         System.out.println("Map -> String " + c.convert(m).to(String.class));
 
         Adapter ca = c.getAdapter();
-        ca.rule(String[].class,
+        ca.rule(String[].class, String.class,
                 v -> Stream.of(v).collect(Collectors.joining(",")),
                 v -> v.split(","));
         String sa = c.convert(new String[] {"A", "B"}).to(String.class);
@@ -44,6 +45,25 @@ public class MyMainClass {
         String[] decoded2 = ca.convert(sa2).to(String[].class);
         System.out.println("decoded2: " + Arrays.toString(decoded2) + " len: " + decoded2.length);
 
+        // use 1
+        JsonCodecImpl jsonCodec = new JsonCodecImpl();
+        String json = jsonCodec.encode(m).getString();
+        System.out.println("JS: " + json);
+
+        Map m2 = jsonCodec.decode(Map.class).from(json);
+        System.out.println("MS: " + m2);
+
+        m.put("f", new Foo("fofofo"));
+        JsonCodecImpl jc1 = new JsonCodecImpl();
+        ConverterImpl c1 = new ConverterImpl();
+        Adapter a1 = c1.getAdapter();
+        a1.rule(Foo.class, String.class,
+                Foo::tsFun,
+                v -> Foo.fsFun(v));
+        String json2 = jc1.with(a1).encode(m).getString();
+        System.out.println("JC1: " + json2);
+        Map m3 = jc1.with(a1).decode(Map.class).from(json2);
+        System.out.println("MS1: " + m3);
         /*
         // use 1
         JsonCodecImpl jsonCodec = new JsonCodecImpl();

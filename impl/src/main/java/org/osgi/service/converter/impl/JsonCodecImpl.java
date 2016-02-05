@@ -30,7 +30,7 @@ public class JsonCodecImpl implements Codec {
 
     @Override
     public <T> Decoding<T> decode(Class<T> cls) {
-        return new JsonDecodingImpl<T>(cls);
+        return new JsonDecodingImpl<T>(converter, cls);
     }
 
     @Override

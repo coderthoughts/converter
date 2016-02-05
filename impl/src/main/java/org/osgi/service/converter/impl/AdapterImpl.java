@@ -1,6 +1,7 @@
 package org.osgi.service.converter.impl;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -10,9 +11,7 @@ import org.osgi.service.converter.Converting;
 
 public class AdapterImpl implements Adapter {
     private final Converter delegate;
-    private final Map<Class<Object>, Function<Object, String>> toClassRules =
-            new ConcurrentHashMap<>();
-    private final Map<Class<Object>, Function<String, Object>> fromClassRules =
+    private final Map<ClassPair, Function<Object, Object>> classRules =
             new ConcurrentHashMap<>();
 
     public AdapterImpl(Converter converter) {
@@ -30,10 +29,15 @@ public class AdapterImpl implements Adapter {
         return new AdapterImpl(this);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <T> Adapter rule(Class<T> cls, Function<T, String> toString, Function<String, T> fromString) {
-        toClassRules.put((Class<Object>) cls, (Function<Object, String>) toString);
-        fromClassRules.put((Class<Object>) cls, (Function<String, Object>) fromString);
+    public <F, T> Adapter rule(Class<F> fromCls, Class<T> toCls,
+            Function<F, T> toFun, Function<T, F> fromFun) {
+        if (fromCls.equals(toCls))
+            throw new IllegalArgumentException();
+
+        classRules.put(new ClassPair(fromCls, toCls), (Function<Object, Object>) toFun);
+        classRules.put(new ClassPair(toCls, fromCls), (Function<Object, Object>) fromFun);
         return this;
     }
 
@@ -46,20 +50,41 @@ public class AdapterImpl implements Adapter {
             del = c;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <T> T to(Class<T> cls) {
-            if (object instanceof String) {
-                Function<String, Object> ff = fromClassRules.get(cls);
-                if (ff != null)
-                    return (T) ff.apply((String) object);
-            }
+            Function<Object, Object> f = classRules.get(new ClassPair(object.getClass(), cls));
+            if (f != null)
+                return (T) f.apply(object);
 
-            if (String.class.equals(cls)) {
-                Function<Object, String> ft = toClassRules.get(object.getClass());
-                if (ft != null)
-                    return (T) ft.apply(object);
-            }
             return del.to(cls);
+        }
+    }
+
+    static class ClassPair {
+        private final Class<?> from;
+        private final Class<?> to;
+
+        ClassPair(Class<?> from, Class<?> to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(from, to);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this)
+                return true;
+            if (!(obj instanceof ClassPair))
+                return false;
+
+            ClassPair o = (ClassPair) obj;
+            return Objects.equals(from, o.from) &&
+                    Objects.equals(to, o.to);
         }
     }
 }

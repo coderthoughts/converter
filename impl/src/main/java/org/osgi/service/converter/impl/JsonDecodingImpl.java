@@ -4,12 +4,15 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.osgi.service.converter.Converter;
 import org.osgi.service.converter.Decoding;
 
 public class JsonDecodingImpl<T> implements Decoding<T> {
     private final Class<T> clazz;
+    private final Converter converter;
 
-    public JsonDecodingImpl(Class<T> cls) {
+    public JsonDecodingImpl(Converter c, Class<T> cls) {
+        converter = c;
         clazz = cls;
     }
 
@@ -61,7 +64,18 @@ public class JsonDecodingImpl<T> implements Decoding<T> {
             if (val.startsWith("{")) {
                 parsed = new JsonCodecImpl().decode(Map.class).from(val);
             } else {
-                parsed = val; // TODO?
+                if ("null".equals(val))
+                    parsed = null;
+                else if ("true".equals(val))
+                    parsed = true;
+                else if ("false".equals(val))
+                    parsed = false;
+                else if (val.startsWith("\""))
+                    parsed = val;
+                else if (val.contains("."))
+                    parsed = Double.valueOf(val);
+                else
+                    parsed = Integer.valueOf(val);
             }
             m.put(key, parsed);
         } while (commaIdx > 0);
@@ -86,8 +100,6 @@ public class JsonDecodingImpl<T> implements Decoding<T> {
 
     @SuppressWarnings("unchecked")
     private <T> T deserializeSingleJSONValue(Class<T> cls, CharSequence cs) {
-
-
         try {
             Method m = cls.getDeclaredMethod("valueOf", String.class);
             if (m != null) {

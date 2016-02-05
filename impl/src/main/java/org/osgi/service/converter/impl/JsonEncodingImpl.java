@@ -37,7 +37,7 @@ public class JsonEncodingImpl implements Encoding {
 
     public String encode(Object obj) {
         if (obj == null) {
-            return ignoreNull() ? "" : "\"null\"";
+            return ignoreNull() ? "" : "null";
         }
 
         if (obj instanceof Map) {
@@ -48,7 +48,7 @@ public class JsonEncodingImpl implements Encoding {
             return obj.toString();
         }
 
-        return "\"" + obj.toString() + "\"";
+        return "\"" + converter.convert(obj).to(String.class) + "\"";
     }
 
     private String encodeMap(Map m) {
@@ -63,7 +63,7 @@ public class JsonEncodingImpl implements Encoding {
             sb.append('"');
             sb.append(entry.getKey().toString());
             sb.append("\":");
-            sb.append(converter.convert(entry.getValue()).to(String.class));
+            sb.append(encode(entry.getValue()));
         }
         sb.append("}");
 
